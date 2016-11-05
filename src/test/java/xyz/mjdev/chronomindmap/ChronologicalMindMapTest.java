@@ -59,15 +59,25 @@ public class ChronologicalMindMapTest {
 		assertThat(timeline.getFacts(), containsInAnyOrder("Fact1", "Fact2"));
 	}
 
+	@Test
+	public void queryFactsBetweenDates() {
+		Timeline timeline = new Timeline();
+		timeline.addFact("4E1", "4E2", new Fact("Fact1"));
+		timeline.addFact("4E2", "4E3", new Fact("Fact2"));
+		timeline.addFact("4E3", "4E4", new Fact("Fact3"));
+
+		assertThat(timeline.getFacts("1E1", "4E3"), hasSize(2));
+	}
+
 	private class Timeline {
 		private List<TimelineFact> facts = new ArrayList<>();
 
-//		public List<String> getFacts(String from, String to) {
-//			return facts.stream()
-//					.filter(f -> f.isBetween(from, to))
-//					.map(TimelineFact::getDescription)
-//					.collect(Collectors.toList());
-//		}
+		public List<String> getFacts(String from, String to) {
+			return facts.stream()
+					.filter(f -> f.isBetween(new SkyrimCalendar(from), new SkyrimCalendar(to)))
+					.map(TimelineFact::getDescription)
+					.collect(Collectors.toList());
+		}
 
 		public void addFact(String from, String to, Fact fact) {
 			facts.add(new DurationFact(from, to, fact));
@@ -79,6 +89,10 @@ public class ChronologicalMindMapTest {
 					.collect(Collectors.toList());
 		}
 
+		public List<String> getFacts(SkyrimCalendar from, SkyrimCalendar to) {
+			return getFacts();
+		}
+
 		private class DurationFact extends TimelineFact {
 			private final String from;
 			private final String to;
@@ -87,6 +101,14 @@ public class ChronologicalMindMapTest {
 				super(fact);
 				this.from = from;
 				this.to = to;
+			}
+
+			@Override
+			public boolean isBetween(SkyrimCalendar from, SkyrimCalendar to) {
+				SkyrimCalendar thisFrom = new SkyrimCalendar(this.from);
+				SkyrimCalendar thisTo = new SkyrimCalendar(this.to);
+
+				return thisFrom.compareTo(from) >= 0 && thisTo.compareTo(to) <= 0;
 			}
 		}
 
@@ -97,9 +119,9 @@ public class ChronologicalMindMapTest {
 				this.fact = fact;
 			}
 
-//			public boolean isBetween(String from, String to) {
-//				return true;
-//			}
+			public boolean isBetween(SkyrimCalendar from, SkyrimCalendar to) {
+				return true;
+			}
 
 			public String getDescription() {
 				return fact.getDescription();
@@ -118,4 +140,5 @@ public class ChronologicalMindMapTest {
 			return description;
 		}
 	}
+
 }
