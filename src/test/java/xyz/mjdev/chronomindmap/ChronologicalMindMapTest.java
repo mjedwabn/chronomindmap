@@ -69,6 +69,33 @@ public class ChronologicalMindMapTest {
 		assertThat(timeline.getFacts("1E1", "4E3"), hasSize(2));
 	}
 
+	@Test
+	public void givenErasAreWellDefined_compareDates() {
+		assertThat(new SkyrimCalendar("2E2"), is(lessThan(new SkyrimCalendar("2E4"))));
+		assertThat(new SkyrimCalendar("3E3"), is(equalTo(new SkyrimCalendar("3E3"))));
+		assertThat(new SkyrimCalendar("3E3"), is(greaterThan(new SkyrimCalendar("3E2"))));
+	}
+
+	@Test
+	public void whenCreateNewCalendarInUndefinedEra_defineEraEndingOnThisYear() {
+		assertThat(new SkyrimCalendar("6E30"), is(lessThan(new SkyrimCalendar("7E10"))));
+	}
+
+	@Test
+	public void givenEraIsFloating_whenCreateNewCalendarGreaterThanErasEnd_adjustEraToThisYear() {
+		SkyrimCalendar calendarOne = new SkyrimCalendar("6E10");
+		SkyrimCalendar calendarTwo = new SkyrimCalendar("6E30");
+		SkyrimCalendar calendarThree = new SkyrimCalendar("8E15");
+
+		assertThat(calendarOne, is(lessThan(calendarThree)));
+		assertThat(calendarTwo, is(lessThan(calendarThree)));
+	}
+
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void givenEraIsWellDefined_whenCreateCalenderExceedingEra_throwException() {
+		new SkyrimCalendar("1E666");
+	}
+
 	private class Timeline {
 		private List<TimelineFact> facts = new ArrayList<>();
 

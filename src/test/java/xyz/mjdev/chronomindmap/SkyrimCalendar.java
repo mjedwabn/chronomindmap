@@ -29,27 +29,26 @@ package xyz.mjdev.chronomindmap;
 import java.time.Duration;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class SkyrimCalendar extends Calendar {
 	private static final Map<Integer, Integer> eras;
+	private static final Set<Integer> wellDefinedEras;
 
 	static {
 		eras = new HashMap<>();
+		wellDefinedEras = new HashSet<>();
 		// FIXME: test values. Need logic allowing evolving eras definition
 		// basing on gathered knowledge from game play.
-		eras.put(1, 200);
-		eras.put(2, 200);
-		eras.put(3, 200);
-		eras.put(4, 200);
+		setWellDefinedEra(1, 200);
+		setWellDefinedEra(2, 200);
+		setWellDefinedEra(3, 200);
+		setWellDefinedEra(4, 200);
 	}
 
 	private final int era;
 	private final int year;
-
 	public SkyrimCalendar(String date) {
 		this(extractEra(date), extractYear(date));
 	}
@@ -57,6 +56,13 @@ public class SkyrimCalendar extends Calendar {
 	public SkyrimCalendar(int era, int year) {
 		this.era = era;
 		this.year = year;
+
+		adjustEra();
+	}
+
+	private static void setWellDefinedEra(int eraNumber, int eraEnd) {
+		eras.put(eraNumber, eraEnd);
+		wellDefinedEras.add(eraNumber);
 	}
 
 	private static int extractEra(String date) {
@@ -64,13 +70,41 @@ public class SkyrimCalendar extends Calendar {
 		return Integer.parseInt(parts[0]);
 	}
 
+	private static int extractYear(String date) {
+		String[] parts = parseDate(date);
+		return Integer.parseInt(parts[1]);
+	}
+
 	private static String[] parseDate(String date) {
 		return date.split("E");
 	}
 
-	private static int extractYear(String date) {
-		String[] parts = parseDate(date);
-		return Integer.parseInt(parts[1]);
+	private void adjustEra() {
+		if (eraIsUndefined())
+			setFloatingEra();
+		else if (yearExceedsEra())
+			if (eraIsFloating())
+				setFloatingEra();
+			else
+				throw new IndexOutOfBoundsException(String.format(
+						"Year %d exceeds end era %s: %d.",
+						year, era, eras.get(era)));
+	}
+
+	private boolean eraIsUndefined() {
+		return !eras.containsKey(era);
+	}
+
+	private void setFloatingEra() {
+		eras.put(era, year);
+	}
+
+	private boolean yearExceedsEra() {
+		return year > eras.get(era);
+	}
+
+	private boolean eraIsFloating() {
+		return !wellDefinedEras.contains(era);
 	}
 
 	@Override
@@ -97,7 +131,7 @@ public class SkyrimCalendar extends Calendar {
 	}
 
 	private int eraDuration(int era) {
-		return eras.get(era);
+		return eras.getOrDefault(era, 1);
 	}
 
 	@Override
