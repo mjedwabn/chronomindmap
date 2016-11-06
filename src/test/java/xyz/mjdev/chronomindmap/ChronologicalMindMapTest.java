@@ -43,6 +43,13 @@ public class ChronologicalMindMapTest {
 	}
 
 	@Test
+	public void addPerson() {
+		KnowledgeBase.personsGateway.add(new Person("Person"));
+		assertThat(KnowledgeBase.personsGateway.findAll().stream()
+				.map(Person::getName).collect(Collectors.toList()), contains("Person"));
+	}
+
+	@Test
 	public void addDurationFact() {
 		Timeline timeline = new Timeline();
 		timeline.addFact("4E174", "4E176", new Fact("Fact"));
