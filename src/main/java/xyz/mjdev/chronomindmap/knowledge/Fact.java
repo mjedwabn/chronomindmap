@@ -24,32 +24,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.knowledge;
 
-import xyz.mjdev.chronomindmap.knowledge.KnowledgeBase;
-import xyz.mjdev.chronomindmap.knowledge.Person;
-import xyz.mjdev.chronomindmap.persistence.KnowledgeBasePersistence;
+public class Fact {
+	private String description;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+	public Fact(String description) {
+		this.description = description;
+	}
 
-public class SkyrimMindMap {
-	public static void main(String[] args) throws IOException {
-		String userHomeDir = System.getProperty("user.home");
-		Path configDir = Paths.get(userHomeDir).resolve(".cmmmj");
-		Path dataFilePath = configDir.resolve("db.json");
-		new File(configDir.toUri()).mkdirs();
-
-		KnowledgeBasePersistence.load(dataFilePath);
-
-		if (args.length == 3) {
-			if (args[0].equals("add") && args[1].equals("person")) {
-				KnowledgeBase.personsGateway.add(new Person(args[2]));
-			}
-		}
-
-		KnowledgeBasePersistence.writeData(dataFilePath);
+	public String getDescription() {
+		return description;
 	}
 }

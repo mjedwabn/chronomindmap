@@ -24,7 +24,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.knowledge;
 
 public class KnowledgeBase {
 	public static Gateway<Person> personsGateway = new Gateway<>();

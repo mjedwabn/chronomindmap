@@ -24,40 +24,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.persistence;
 
-import org.junit.Test;
+import xyz.mjdev.chronomindmap.knowledge.Person;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
+import java.util.List;
 
-public class SkyrimCalendarTest {
-	@Test
-	public void givenErasAreWellDefined_compareDates() {
-		assertThat(new SkyrimCalendar("2E2"), is(lessThan(new SkyrimCalendar("2E4"))));
-		assertThat(new SkyrimCalendar("3E3"), is(equalTo(new SkyrimCalendar("3E3"))));
-		assertThat(new SkyrimCalendar("3E3"), is(greaterThan(new SkyrimCalendar("3E2"))));
+public class DataFile {
+	private List<Person> persons = new ArrayList<>();
+
+	public List<Person> getPersons() {
+		return persons;
 	}
 
-	@Test
-	public void whenCreateNewCalendarInUndefinedEra_defineEraEndingOnThisYear() {
-		assertThat(new SkyrimCalendar("6E30"), is(lessThan(new SkyrimCalendar("7E10"))));
-	}
-
-	@Test
-	public void givenEraIsFloating_whenCreateNewCalendarGreaterThanErasEnd_adjustEraToThisYear() {
-		SkyrimCalendar calendarOne = new SkyrimCalendar("6E10");
-		SkyrimCalendar calendarTwo = new SkyrimCalendar("6E30");
-		SkyrimCalendar calendarThree = new SkyrimCalendar("8E15");
-
-		assertThat(calendarOne, is(lessThan(calendarThree)));
-		assertThat(calendarTwo, is(lessThan(calendarThree)));
-	}
-
-	@Test(expected = IndexOutOfBoundsException.class)
-	public void givenEraIsWellDefined_whenCreateCalenderExceedingEra_throwException() {
-		new SkyrimCalendar("1E666");
+	public void setPersons(List<Person> persons) {
+		this.persons = persons;
 	}
 }

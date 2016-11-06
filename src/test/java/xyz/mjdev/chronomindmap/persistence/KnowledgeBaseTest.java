@@ -24,10 +24,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.persistence;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import xyz.mjdev.chronomindmap.knowledge.Gateway;
+import xyz.mjdev.chronomindmap.knowledge.KnowledgeBase;
+import xyz.mjdev.chronomindmap.knowledge.Person;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,6 +39,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -46,12 +51,26 @@ public class KnowledgeBaseTest {
 	}
 
 	@Test
+	public void addPerson() {
+		KnowledgeBase.personsGateway.add(new Person("Person"));
+		assertThat(KnowledgeBase.personsGateway.findAll().stream()
+				.map(Person::getName).collect(Collectors.toList()), contains("Person"));
+	}
+
+	@Test
 	public void loadPersonsFromJson() {
 		String data = "{\"persons\":[{\"name\":\"Person\"}]}";
-		KnowledgeBaseLoader.load(asInputStream(data));
+		KnowledgeBasePersistence.load(asInputStream(data));
 
 		assertThat(KnowledgeBase.personsGateway.findAll(),
 				contains(new Person("Person")));
+	}
+
+	@Ignore
+	@Test
+	public void loadFactsFromJson() {
+
+//		assertThat(KnowledgeBase.factsGateway.findAll(), contains(new TimelineFact(new Fact("Fact"))));
 	}
 
 	private ByteArrayInputStream asInputStream(String data) {
@@ -60,20 +79,20 @@ public class KnowledgeBaseTest {
 
 	@Test
 	public void whenDataFileDoesNotExist_loadEmptyKnowledgeBase() {
-		KnowledgeBaseLoader.load(Paths.get("notExistingFile"));
+		KnowledgeBasePersistence.load(Paths.get("notExistingFile"));
 		assertThat(KnowledgeBase.personsGateway.findAll(), is(empty()));
 	}
 
 	@Test
 	public void whenDataFileIsCorrupted_loadEmptyKnowledgeBase() {
-		KnowledgeBaseLoader.load(asInputStream("corrupted content"));
+		KnowledgeBasePersistence.load(asInputStream("corrupted content"));
 		assertThat(KnowledgeBase.personsGateway.findAll(), is(empty()));
 	}
 
 	@Test
 	public void dumpEmptyKnowledgeBase() throws URISyntaxException, IOException {
 		Path dataFilePath = getDataFilePath("test_db.json");
-		KnowledgeBaseLoader.writeData(dataFilePath);
+		KnowledgeBasePersistence.writeData(dataFilePath);
 
 		assertThat(read(dataFilePath), is("{\"persons\":[]}"));
 

@@ -24,7 +24,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.timeline;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
@@ -49,6 +49,7 @@ public class SkyrimCalendar extends Calendar {
 
 	private final int era;
 	private final int year;
+
 	public SkyrimCalendar(String date) {
 		this(extractEra(date), extractYear(date));
 	}

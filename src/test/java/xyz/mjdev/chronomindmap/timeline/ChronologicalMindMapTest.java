@@ -24,11 +24,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.timeline;
 
 import org.junit.Test;
+import xyz.mjdev.chronomindmap.knowledge.Fact;
+import xyz.mjdev.chronomindmap.knowledge.TimelineFact;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,13 +43,6 @@ public class ChronologicalMindMapTest {
 	public void newTimelineShallNotHaveFacts() {
 		Timeline timeline = new Timeline();
 		assertThat(timeline.getFacts(), is(empty()));
-	}
-
-	@Test
-	public void addPerson() {
-		KnowledgeBase.personsGateway.add(new Person("Person"));
-		assertThat(KnowledgeBase.personsGateway.findAll().stream()
-				.map(Person::getName).collect(Collectors.toList()), contains("Person"));
 	}
 
 	@Test
@@ -96,56 +92,20 @@ public class ChronologicalMindMapTest {
 					.collect(Collectors.toList());
 		}
 
-		public List<String> getFacts(SkyrimCalendar from, SkyrimCalendar to) {
-			return getFacts();
-		}
-
 		private class DurationFact extends TimelineFact {
-			private final String from;
-			private final String to;
+			private final Calendar from;
+			private final Calendar to;
 
 			public DurationFact(String from, String to, Fact fact) {
 				super(fact);
-				this.from = from;
-				this.to = to;
+				this.from = new SkyrimCalendar(from);
+				this.to = new SkyrimCalendar(to);
 			}
 
 			@Override
-			public boolean isBetween(SkyrimCalendar from, SkyrimCalendar to) {
-				SkyrimCalendar thisFrom = new SkyrimCalendar(this.from);
-				SkyrimCalendar thisTo = new SkyrimCalendar(this.to);
-
-				return thisFrom.compareTo(from) >= 0 && thisTo.compareTo(to) <= 0;
-			}
-		}
-
-		private class TimelineFact {
-			private final Fact fact;
-
-			public TimelineFact(Fact fact) {
-				this.fact = fact;
-			}
-
-			public boolean isBetween(SkyrimCalendar from, SkyrimCalendar to) {
-				return true;
-			}
-
-			public String getDescription() {
-				return fact.getDescription();
+			public boolean isBetween(Calendar from, Calendar to) {
+				return this.from.compareTo(from) >= 0 && this.to.compareTo(to) <= 0;
 			}
 		}
 	}
-
-	private class Fact {
-		private String description;
-
-		public Fact(String description) {
-			this.description = description;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-	}
-
 }

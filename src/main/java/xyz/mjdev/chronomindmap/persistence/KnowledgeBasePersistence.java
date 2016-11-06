@@ -24,21 +24,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.persistence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import xyz.mjdev.chronomindmap.knowledge.KnowledgeBase;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class KnowledgeBaseLoader {
+public class KnowledgeBasePersistence {
 	private static final Logger logger = Logger.getLogger(
-			KnowledgeBaseLoader.class.getName());
+			KnowledgeBasePersistence.class.getName());
 	private static final String EMPTY_DATAFILE = "{}";
 
-	static DataFile readData(Path dataFile) {
+	public static DataFile readData(Path dataFile) {
 		return readData(asInputStream(dataFile));
 	}
 
@@ -65,19 +66,19 @@ public class KnowledgeBaseLoader {
 		return dataFile;
 	}
 
-	static void fillKnowledgeBase(DataFile dataFile) {
+	public static void fillKnowledgeBase(DataFile dataFile) {
 		dataFile.getPersons().forEach(p -> KnowledgeBase.personsGateway.add(p));
 	}
 
-	static void load(InputStream inputStream) {
+	public static void load(InputStream inputStream) {
 		fillKnowledgeBase(readData(inputStream));
 	}
 
-	static void load(Path path) {
+	public static void load(Path path) {
 		fillKnowledgeBase(readData(path));
 	}
 
-	static void writeData(Path dataFilePath) throws IOException {
+	public static void writeData(Path dataFilePath) throws IOException {
 		writeData(dumpKnowledgeBase(), dataFilePath);
 	}
 

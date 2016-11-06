@@ -24,19 +24,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.knowledge;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class DataFile {
-	private List<Person> persons = new ArrayList<>();
+public class Gateway<T> {
+	private List<T> entities = new ArrayList<T>();
 
-	public List<Person> getPersons() {
-		return persons;
+	public void add(T entity) {
+		entities.add(entity);
 	}
 
-	public void setPersons(List<Person> persons) {
-		this.persons = persons;
+	public List<T> findAll() {
+		return entities.stream().collect(Collectors.toList());
 	}
 }
