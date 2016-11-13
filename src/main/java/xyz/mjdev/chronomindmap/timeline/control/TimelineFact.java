@@ -24,38 +24,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap.knowledge;
+package xyz.mjdev.chronomindmap.timeline.control;
 
-import java.util.Objects;
+import xyz.mjdev.chronomindmap.knowledge.entity.Fact;
 
-public class Person {
-	private String name;
+import java.util.Calendar;
 
-	public Person() {
+public abstract class TimelineFact extends Fact {
+	public TimelineFact() {
+
 	}
 
-	public Person(String name) {
-		this.name = name;
+	public TimelineFact(String name) {
+		super(name);
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		Person person = (Person) o;
-		return Objects.equals(name, person.name);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(name);
-	}
+	public abstract boolean isBetween(Calendar from, Calendar to);
 }

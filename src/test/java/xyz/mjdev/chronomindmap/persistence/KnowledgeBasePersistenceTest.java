@@ -26,12 +26,16 @@
  */
 package xyz.mjdev.chronomindmap.persistence;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import xyz.mjdev.chronomindmap.knowledge.Gateway;
 import xyz.mjdev.chronomindmap.knowledge.KnowledgeBase;
-import xyz.mjdev.chronomindmap.knowledge.Person;
+import xyz.mjdev.chronomindmap.knowledge.entity.Fact;
+import xyz.mjdev.chronomindmap.knowledge.entity.Person;
+import xyz.mjdev.chronomindmap.knowledge.entity.Place;
+import xyz.mjdev.chronomindmap.knowledge.entity.SimpleTimeFact;
+import xyz.mjdev.chronomindmap.timeline.control.Timeline;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -41,36 +45,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
 
-public class KnowledgeBaseTest {
-	@Before
-	public void setUp() {
-		KnowledgeBase.personsGateway = new Gateway<>();
-	}
-
-	@Test
-	public void addPerson() {
-		KnowledgeBase.personsGateway.add(new Person("Person"));
-		assertThat(KnowledgeBase.personsGateway.findAll().stream()
-				.map(Person::getName).collect(Collectors.toList()), contains("Person"));
-	}
-
-	@Test
-	public void loadPersonsFromJson() {
-		String data = "{\"persons\":[{\"name\":\"Person\"}]}";
-		KnowledgeBasePersistence.load(asInputStream(data));
-
-		assertThat(KnowledgeBase.personsGateway.findAll(),
-				contains(new Person("Person")));
-	}
-
-	@Ignore
-	@Test
-	public void loadFactsFromJson() {
-
-//		assertThat(KnowledgeBase.factsGateway.findAll(), contains(new TimelineFact(new Fact("Fact"))));
+public class KnowledgeBasePersistenceTest {
+	@BeforeEach
+	public void initKnowledgeBase() {
+		KnowledgeBase.factsGateway = new Gateway<>();
 	}
 
 	private ByteArrayInputStream asInputStream(String data) {
@@ -80,13 +61,13 @@ public class KnowledgeBaseTest {
 	@Test
 	public void whenDataFileDoesNotExist_loadEmptyKnowledgeBase() {
 		KnowledgeBasePersistence.load(Paths.get("notExistingFile"));
-		assertThat(KnowledgeBase.personsGateway.findAll(), is(empty()));
+		assertThat(KnowledgeBase.factsGateway.findAll(), is(empty()));
 	}
 
 	@Test
 	public void whenDataFileIsCorrupted_loadEmptyKnowledgeBase() {
 		KnowledgeBasePersistence.load(asInputStream("corrupted content"));
-		assertThat(KnowledgeBase.personsGateway.findAll(), is(empty()));
+		assertThat(KnowledgeBase.factsGateway.findAll(), is(empty()));
 	}
 
 	@Test
@@ -94,7 +75,7 @@ public class KnowledgeBaseTest {
 		Path dataFilePath = getDataFilePath("test_db.json");
 		KnowledgeBasePersistence.writeData(dataFilePath);
 
-		assertThat(read(dataFilePath), is("{\"persons\":[]}"));
+		assertThat(read(dataFilePath), is("{}"));
 
 		Files.deleteIfExists(dataFilePath);
 	}
@@ -106,5 +87,52 @@ public class KnowledgeBaseTest {
 
 	private String read(Path dataFilePath) throws IOException {
 		return new String(Files.readAllBytes(dataFilePath));
+	}
+
+	@Nested
+	class Persons {
+		@Test
+		public void addPerson() {
+			KnowledgeBase.factsGateway.add(new Person("Person"));
+			assertThat(KnowledgeBase.factsGateway.findAll().stream()
+					.filter(f -> f instanceof Person)
+					.map(Fact::getName).collect(Collectors.toList()), contains("Person"));
+		}
+
+		@Test
+		public void loadPersonsFromJson() {
+			String data = "{\"facts\":[{\"@type\":\"Person\", \"name\":\"Person\"}]}";
+			KnowledgeBasePersistence.load(asInputStream(data));
+
+			assertThat(KnowledgeBase.factsGateway.findAll(),
+					contains(new Person("Person")));
+		}
+	}
+
+	@Nested
+	class Facts {
+		@Test
+		public void loadFactsFromJson() {
+			String data = "{\"facts\":[" +
+					"{\"@type\":\"Person\", \"name\":\"Fact1\"}," +
+					"{\"@type\":\"Place\", \"name\":\"Fact2\"}]}";
+			KnowledgeBasePersistence.load(asInputStream(data));
+
+			assertThat(KnowledgeBase.factsGateway.findAll(),
+					contains(new Person("Fact1"), new Place("Fact2")));
+		}
+	}
+
+	@Nested
+	class TimelineFacts {
+		@Test
+		public void buildTimelineFromGatheredFacts() {
+			KnowledgeBase.factsGateway.add(new SimpleTimeFact("1E1", "Fact1"));
+			KnowledgeBase.factsGateway.add(new SimpleTimeFact("1E1", "Fact2"));
+
+			Timeline timeline = Timeline.fromFacts(KnowledgeBase.factsGateway.findAll());
+
+			assertThat(timeline.getFacts(), contains("Fact1", "Fact2"));
+		}
 	}
 }

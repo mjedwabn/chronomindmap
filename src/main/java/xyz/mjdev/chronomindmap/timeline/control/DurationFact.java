@@ -24,32 +24,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.timeline.control;
 
-import xyz.mjdev.chronomindmap.knowledge.KnowledgeBase;
-import xyz.mjdev.chronomindmap.knowledge.entity.Person;
-import xyz.mjdev.chronomindmap.persistence.KnowledgeBasePersistence;
+import xyz.mjdev.chronomindmap.knowledge.entity.Fact;
+import xyz.mjdev.chronomindmap.timeline.SkyrimCalendar;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Calendar;
 
-public class SkyrimMindMap {
-	public static void main(String[] args) throws IOException {
-		String userHomeDir = System.getProperty("user.home");
-		Path configDir = Paths.get(userHomeDir).resolve(".cmmmj");
-		Path dataFilePath = configDir.resolve("db.json");
-		new File(configDir.toUri()).mkdirs();
+public class DurationFact extends TimelineFact {
+	private final Calendar from;
+	private final Calendar to;
 
-		KnowledgeBasePersistence.load(dataFilePath);
+	public DurationFact(String from, String to, String name) {
+		super(name);
+		this.from = new SkyrimCalendar(from);
+		this.to = new SkyrimCalendar(to);
+	}
 
-		if (args.length == 3) {
-			if (args[0].equals("add") && args[1].equals("person")) {
-				KnowledgeBase.factsGateway.add(new Person(args[2]));
-			}
-		}
-
-		KnowledgeBasePersistence.writeData(dataFilePath);
+	@Override
+	public boolean isBetween(Calendar from, Calendar to) {
+		return this.from.compareTo(from) >= 0 && this.to.compareTo(to) <= 0;
 	}
 }

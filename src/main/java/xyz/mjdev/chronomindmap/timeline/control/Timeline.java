@@ -24,32 +24,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap;
+package xyz.mjdev.chronomindmap.timeline.control;
 
-import xyz.mjdev.chronomindmap.knowledge.KnowledgeBase;
-import xyz.mjdev.chronomindmap.knowledge.entity.Person;
-import xyz.mjdev.chronomindmap.persistence.KnowledgeBasePersistence;
+import xyz.mjdev.chronomindmap.knowledge.entity.Fact;
+import xyz.mjdev.chronomindmap.timeline.SkyrimCalendar;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class SkyrimMindMap {
-	public static void main(String[] args) throws IOException {
-		String userHomeDir = System.getProperty("user.home");
-		Path configDir = Paths.get(userHomeDir).resolve(".cmmmj");
-		Path dataFilePath = configDir.resolve("db.json");
-		new File(configDir.toUri()).mkdirs();
+public class Timeline {
+	private List<TimelineFact> facts = new ArrayList<>();
 
-		KnowledgeBasePersistence.load(dataFilePath);
-
-		if (args.length == 3) {
-			if (args[0].equals("add") && args[1].equals("person")) {
-				KnowledgeBase.factsGateway.add(new Person(args[2]));
-			}
-		}
-
-		KnowledgeBasePersistence.writeData(dataFilePath);
+	public static Timeline fromFacts(List<Fact> facts) {
+		Timeline timeline = new Timeline();
+		timeline.facts = facts.stream()
+				.filter(f -> f instanceof TimelineFact)
+				.map(f -> (TimelineFact) f)
+				.collect(Collectors.toList());
+		return timeline;
 	}
+
+	public List<String> getFacts(String from, String to) {
+		return facts.stream()
+				.filter(f -> f.isBetween(new SkyrimCalendar(from), new SkyrimCalendar(to)))
+				.map(Fact::getName)
+				.collect(Collectors.toList());
+	}
+
+	public void addFact(TimelineFact fact) {
+		facts.add(fact);
+	}
+
+	public List<String> getFacts() {
+		return facts.stream()
+				.map(Fact::getName)
+				.collect(Collectors.toList());
+	}
+
+	public void addFact(String from, String to, String fact) {
+		addFact(new DurationFact(from, to, fact));
+	}
+
 }

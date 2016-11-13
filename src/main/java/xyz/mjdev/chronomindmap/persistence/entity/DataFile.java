@@ -24,16 +24,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap.knowledge;
+package xyz.mjdev.chronomindmap.persistence.entity;
 
-public class Fact {
-	private String description;
+import xyz.mjdev.chronomindmap.knowledge.entity.Fact;
 
-	public Fact(String description) {
-		this.description = description;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DataFile {
+	private List<Fact> facts = new ArrayList<>();
+
+	public List<Fact> getFacts() {
+		return facts;
 	}
 
-	public String getDescription() {
-		return description;
+	public void setFacts(List<Fact> facts) {
+		this.facts = facts;
 	}
 }

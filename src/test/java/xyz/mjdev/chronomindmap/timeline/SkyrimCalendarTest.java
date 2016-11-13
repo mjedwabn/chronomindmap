@@ -26,10 +26,11 @@
  */
 package xyz.mjdev.chronomindmap.timeline;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.expectThrows;
 
 public class SkyrimCalendarTest {
 	@Test
@@ -54,8 +55,10 @@ public class SkyrimCalendarTest {
 		assertThat(calendarTwo, is(lessThan(calendarThree)));
 	}
 
-	@Test(expected = IndexOutOfBoundsException.class)
+	@Test
 	public void givenEraIsWellDefined_whenCreateCalenderExceedingEra_throwException() {
-		new SkyrimCalendar("1E666");
+		expectThrows(IndexOutOfBoundsException.class, () -> {
+			new SkyrimCalendar("1E666");
+		});
 	}
 }

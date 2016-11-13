@@ -26,6 +26,8 @@
  */
 package xyz.mjdev.chronomindmap.knowledge;
 
+import xyz.mjdev.chronomindmap.knowledge.entity.Fact;
+
 public class KnowledgeBase {
-	public static Gateway<Person> personsGateway = new Gateway<>();
+	public static Gateway<Fact> factsGateway = new Gateway<>();
 }

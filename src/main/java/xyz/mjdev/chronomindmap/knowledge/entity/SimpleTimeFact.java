@@ -24,21 +24,57 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap.persistence;
+package xyz.mjdev.chronomindmap.knowledge.entity;
 
-import xyz.mjdev.chronomindmap.knowledge.Person;
+import xyz.mjdev.chronomindmap.timeline.control.TimelineFact;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.bind.annotation.XmlType;
+import java.util.Calendar;
+import java.util.Objects;
 
-public class DataFile {
-	private List<Person> persons = new ArrayList<>();
+@XmlType(name = "SimpleTimeFact")
+public class SimpleTimeFact extends TimelineFact {
+	private String date;
 
-	public List<Person> getPersons() {
-		return persons;
+	public SimpleTimeFact() {
 	}
 
-	public void setPersons(List<Person> persons) {
-		this.persons = persons;
+	public SimpleTimeFact(String date, String name) {
+		super(name);
+		this.date = date;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
+	}
+
+	@Override
+	public boolean isBetween(Calendar from, Calendar to) {
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "SimpleTimeFact{" +
+				"date='" + date + '\'' +
+				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+		SimpleTimeFact that = (SimpleTimeFact) o;
+		return Objects.equals(date, that.date);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), date);
 	}
 }

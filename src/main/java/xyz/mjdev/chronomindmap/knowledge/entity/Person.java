@@ -24,23 +24,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package xyz.mjdev.chronomindmap.knowledge;
+package xyz.mjdev.chronomindmap.knowledge.entity;
 
-import java.util.Calendar;
-
-public class TimelineFact {
-	private final Fact fact;
-	private Calendar date;
-
-	public TimelineFact(Fact fact) {
-		this.fact = fact;
+public class Person extends Fact {
+	public Person() {
 	}
 
-	public boolean isBetween(Calendar from, Calendar to) {
-		return true;
+	public Person(String person) {
+		super(person);
 	}
 
-	public String getDescription() {
-		return fact.getDescription();
+	@Override
+	public String toString() {
+		return "Person{} " + super.toString();
 	}
 }

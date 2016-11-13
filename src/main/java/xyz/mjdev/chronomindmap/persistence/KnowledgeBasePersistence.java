@@ -26,8 +26,15 @@
  */
 package xyz.mjdev.chronomindmap.persistence;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import xyz.mjdev.chronomindmap.knowledge.KnowledgeBase;
+import xyz.mjdev.chronomindmap.knowledge.entity.Person;
+import xyz.mjdev.chronomindmap.knowledge.entity.Place;
+import xyz.mjdev.chronomindmap.knowledge.entity.SimpleTimeFact;
+import xyz.mjdev.chronomindmap.persistence.entity.DataFile;
+import xyz.mjdev.chronomindmap.timeline.control.DurationFact;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -51,23 +58,36 @@ public class KnowledgeBasePersistence {
 		}
 	}
 
-	static DataFile readData(InputStream inputStream) {
+	private static DataFile readData(InputStream inputStream) {
 		try {
-			return new ObjectMapper().readValue(inputStream, DataFile.class);
+			return getObjectMapper().readValue(inputStream, DataFile.class);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Could not read data file. {0}", e.getMessage());
 			return new DataFile();
 		}
 	}
 
-	static DataFile dumpKnowledgeBase() {
+	private static ObjectMapper getObjectMapper() {
+		ObjectMapper om = new ObjectMapper();
+		om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+		om.registerSubtypes(
+				new NamedType(Person.class, "Person"),
+				new NamedType(Place.class, "Place"),
+				new NamedType(DurationFact.class, "DurationFact"),
+				new NamedType(SimpleTimeFact.class, "SimpleTimeFact")
+		);
+		return om;
+	}
+
+	private static DataFile dumpKnowledgeBase() {
 		DataFile dataFile = new DataFile();
-		dataFile.setPersons(KnowledgeBase.personsGateway.findAll());
+		dataFile.setFacts(KnowledgeBase.factsGateway.findAll());
 		return dataFile;
 	}
 
 	public static void fillKnowledgeBase(DataFile dataFile) {
-		dataFile.getPersons().forEach(p -> KnowledgeBase.personsGateway.add(p));
+		// boundary between data layer and business application
+		dataFile.getFacts().forEach(f -> KnowledgeBase.factsGateway.add(f));
 	}
 
 	public static void load(InputStream inputStream) {
@@ -83,7 +103,6 @@ public class KnowledgeBasePersistence {
 	}
 
 	private static void writeData(DataFile dataFile, Path dataFilePath) throws IOException {
-		ObjectMapper om = new ObjectMapper();
-		om.writeValue(dataFilePath.toFile(), dataFile);
+		getObjectMapper().writeValue(dataFilePath.toFile(), dataFile);
 	}
 }
